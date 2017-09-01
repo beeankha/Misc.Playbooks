@@ -1,0 +1,21 @@
+---
+
+- hosts: all
+  gather_facts: false
+  vars:
+    user1: Jcostigan
+    user2: Mbarry
+    user3: Rfrankoff
+  tasks:
+    - name: create user1 folder
+      file:
+        path: ~/Desktop/{{user1}}
+        state: directory
+    - name: create user2 folder
+      file:
+        path: ~/Desktop/{{user2}}
+        state: directory
+    - name: create user3 folder
+      file:
+        path: ~/Desktop/{{user3}}
+        state: directory

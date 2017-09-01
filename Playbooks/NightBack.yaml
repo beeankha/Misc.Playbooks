@@ -1,0 +1,9 @@
+---
+
+- hosts: all
+  gather_facts: false
+  tasks:
+    - name: copy trial keys
+      copy:
+        src: ~/Desktop/trial keys
+        dest: /tmp/backup/ 

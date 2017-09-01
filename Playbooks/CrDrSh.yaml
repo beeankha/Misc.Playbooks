@@ -1,0 +1,21 @@
+---
+
+- hosts: all
+  gather_facts: false
+  tasks:
+    - name: create invoices folder
+      shell: mkdir invoices
+      args:
+        chdir: ~/Desktop
+    - name: create contacts folder
+      shell: mkdir contacts
+      args:
+        chdir: ~/Desktop
+    - name: create travel expenses folder
+      shell: mkdir travel_expenses
+      args:
+        chdir: ~/Desktop
+    - name: create general expenses folder
+      shell: mkdir general_expenses
+      args:
+        chdir: ~/Desktop

@@ -1,0 +1,8 @@
+---
+
+- name: create new instance
+  hosts: all
+  connection: local
+  roles:
+    - ec2
+  tags: ec2_create

@@ -1,0 +1,19 @@
+- hosts: all
+  gather_facts: false
+  tasks:
+    - name: create invoices folder
+      file:
+        path: ~/Desktop/invoices
+        state: directory
+    - name: create travel expenses folder
+      file:
+        path: ~/Desktop/travel_expenses
+        state: directory
+    - name: create contacts folder
+      file:
+        path: ~/Desktop/contacts
+        state: directory
+    - name: create general expenses folder
+      file:
+        path: ~/Desktop/general_expenses
+        state: directory

@@ -1,0 +1,32 @@
+---
+
+- hosts: all
+  gather_facts: false 
+  tasks:
+    - name: ping 1
+      ping: 
+    - name: sleep for one second
+      pause:
+        seconds: 1 
+    - name: ping 1
+      ping: 
+    - name: sleep for one second
+      pause:
+        seconds: 1 
+    - name: ping 1
+      ping: 
+    - name: sleep for one second
+      pause:
+        seconds: 1 
+    - name: ping 1
+      ping: 
+    - name: sleep for one second
+      pause:
+        seconds: 1 
+    - name: ping 1
+      ping: 
+    - name: sleep for one second
+      pause:
+        seconds: 1 
+
+

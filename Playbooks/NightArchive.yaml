@@ -1,0 +1,34 @@
+---
+
+- hosts: all
+  gather_facts: false
+  tasks:
+    - name: create backup directory
+      file:
+        path: /tmp/backup
+        state: directory
+    - name: create an archive of Documents directory contents
+      archive: 
+        path: ~/Documents
+        dest: /tmp/backup/documents.tar.bz2
+        format: bz2
+    - name: create an archive of Pictures directory contents
+      archive:
+        path: ~/Pictures
+        dest: /tmp/backup/pictures.tar.bz2
+        format: bz2
+    - name: create an archive of Library directory contents
+      archive:
+        path: ~/Library
+        dest: /tmp/backup/library.tar.bz2
+        format: bz2
+    - name: create an archive of Movies directory contents
+      archive:
+        path: ~/Movies
+        dest: /tmp/backup/movies.tar.bz2
+        format: bz2
+    - name: create an archive of Music directory contents
+      archive:
+        path: ~/Music
+        dest: /tmp/backup/music.tar.bz2
+        format: bz2

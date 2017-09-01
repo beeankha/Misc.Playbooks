@@ -1,0 +1,14 @@
+- hosts: all
+  gather_facts: true
+  tasks:
+    - name: Install FreeRADIUS packages
+      yum:
+        name: freeradius
+        state: present
+        update_cache: yes
+
+    - name: Restart radius service
+      service:
+        name: radiusd
+        state: restarted
+        enabled: yes
