@@ -1,0 +1,26 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+
+  vars:
+    key_name: "🔐"
+    region: # put region of preference here
+    image: 🔐
+    id: "spinup testing"
+    instance_type: # put type of preference; t2.micro is good for testing
+    security_group: "🔐"
+
+  tasks:
+    - name: Launch EC2 instance
+      amazon.aws.ec2_instance:
+        key_name: "{{ key_name }}"
+        instance_type: "{{ instance_type }}"
+        security_group: "{{ security_group }}"
+        region: "{{ region }}"
+        network:
+          assign_public_ip: true
+        image_id: "{{ image }}"
+        tags: 
+          Owner: "you@example.com"
+          Persistent: False

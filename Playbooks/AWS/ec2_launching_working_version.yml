@@ -1,0 +1,49 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: False
+  # Based on info found here: https://www.coachdevops.com/2024/01/ansible-playbook-for-provisioning-new.html
+  # and here: https://medium.com/@a_tsai5/creating-an-ec2-instance-using-ansible-764cf70015f6
+
+  vars:
+    region: # put region of preference here
+    image: 🔐
+    id: 🔐
+    instance_name: "example-name"
+    instance_type: # put type of preference; t2.micro is good for testing
+    security_group: "🔐"
+
+  tasks:
+  - name: Configure Security Group for the Instance
+    amazon.aws.ec2_security_group:
+      name: "{{ security_group }}"
+      description: example-security-group
+      region: "{{ region }}"
+      rules:
+        - proto: tcp
+          from_port: 22
+          to_port: 22
+          cidr_ip: 0.0.0.0/0
+        - proto: tcp
+          from_port: 80
+          to_port: 80
+          cidr_ip: 0.0.0.0/0
+        - proto: tcp
+          from_port: 8080
+          to_port: 8080
+          cidr_ip: 0.0.0.0/0
+      rules_egress:
+        - proto: all
+          cidr_ip: 0.0.0.0/0
+
+  - name: Create an EC2 Instance
+    amazon.aws.ec2_instance:
+      security_group: "{{ security_group }}"
+      name: "{{ instance_name }}"
+      instance_type: "{{ instance_type}}"
+      image_id: "{{ image }}"
+      region: "{{ region }}"
+      wait_timeout: 3
+      tags: 
+        Owner: "you@example.com"  # remove this before committing
+        Persistent: False
