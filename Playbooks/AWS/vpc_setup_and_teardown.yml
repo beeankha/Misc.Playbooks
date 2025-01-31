@@ -1,0 +1,92 @@
+---
+- name: Setup VPC, Subnet, and Gateway in AWS, Create and Shut Down EC2 Instance
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    vpc_cidr:  # something like "10.0.0.0/16"
+    subnet_cidr:  # something like "10.0.1.0/24"
+    subnet_name: "example-subnet"
+    vpc_name: "example-vpc"
+    region: # put region of preference here
+    image_id: 🔐  # will be something like "ami-2394723423987"
+    image_name: "Example-Subnet-Gateway-Test"
+    instance_type: # put type of preference; t2.micro is good for testing
+    security_group: "example-security-group"
+
+  tasks:
+    - name: Create VPC
+      amazon.aws.ec2_vpc_net:
+        cidr_block: "{{ vpc_cidr }}"
+        name: "{{ vpc_name }}"
+        region: "{{ region }}"
+        state: present
+
+    - name: Display VPC ID
+      ansible.builtin.command:
+        aws ec2 describe-vpcs --filter Name=tag:Name,Values="{{ subnet_name }}" --region={{ region }} --query Vpcs[].VpcId --output text
+      register: vpc_id
+      changed_when: vpc_id.rc != 0
+
+    - name: Capture VPC ID
+      ansible.builtin.debug:
+        var: vpc_id.stdout
+
+    - name: Create Subnet
+      amazon.aws.ec2_vpc_subnet:
+        cidr: "{{ subnet_cidr }}"
+        vpc_id: "{{ vpc_id.stdout }}"
+        region: "{{ region }}"
+        tags:
+          Name: "Playbook Test Subnet"
+        state: present
+
+    - name: Display Subnet ID
+      ansible.builtin.command:
+        aws ec2 describe-subnets --region="{{ region }}" --filter Name=tag:Name,Values="Playbook Test Subnet" --query Subnets[].SubnetId --output text
+      register: subnet_id
+      changed_when: subnet_id.rc != 0
+
+    - name: Capture Subnet ID
+      ansible.builtin.debug:
+        var: subnet_id.stdout
+
+    - name: Create Gateway
+      amazon.aws.ec2_vpc_nat_gateway:
+        subnet_id: "{{ subnet_id.stdout }}"
+        region: "{{ region }}"
+        state: present
+
+    - name: Configure Security Group for the Instance
+      amazon.aws.ec2_security_group:
+        name: "{{ security_group }}"
+        description: example-security-group
+        region: "{{ region }}"
+        rules:
+          - proto: tcp
+            from_port: 22
+            to_port: 22
+            cidr_ip: 0.0.0.0/0
+        rules_egress:
+          - proto: all
+            cidr_ip: 0.0.0.0/0
+
+    - name: Create EC2 Instance in Gateway Subnet
+      amazon.aws.ec2_instance:
+        security_group: "{{ security_group }}"
+        name: "{{ image_name }}"
+        instance_type: "{{ instance_type }}"
+        image_id: "{{ image_id }}"
+        region: "{{ region }}"
+        wait_timeout: 3
+        tags:
+          Owner: "you@example.com"
+          Persistent: false
+
+    - name: Shut Down EC2 Instance
+      amazon.aws.ec2_instance:
+        name: "{{ image_name }}"
+        region: "{{ region }}"
+        state: absent
+        wait_timeout: 3
