@@ -38,5 +38,5 @@
         region: "{{ region }}"
         wait_timeout: 3
         tags:
-          Owner: "you@example.com"  # remove this before committing
+          Owner: "you@example.com"
           Persistent: false
