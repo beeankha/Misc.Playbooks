@@ -1,7 +1,8 @@
 ---
-- hosts: localhost
+- name: Get Info on Instances and Shut Down an EC2 Instance
+  hosts: localhost
   connection: local
-  gather_facts: False
+  gather_facts: false
   # Run this playbook with -vvv at the end in
   # order to see the actual info
 
@@ -10,15 +11,15 @@
     instance_name: "🔐"
 
   tasks:
-  - name: Gather Information About All Instances
-    amazon.aws.ec2_instance_info:
-      filters:
-        availability-zone: 🔐  # Specify specific region, i.e. "us-east-1b"
-      region: "{{ region }}"
+    - name: Gather Information About All Instances
+      amazon.aws.ec2_instance_info:
+        filters:
+          availability-zone: 🔐  # Specify specific region, i.e. "us-east-1b"
+        region: "{{ region }}"
 
-  - name: Shut Down EC2 Instance
-    amazon.aws.ec2_instance:
-      name: "{{ instance_name }}"
-      region: "{{ region }}"
-      state: absent
-      wait_timeout: 3
+    - name: Shut Down EC2 Instance
+      amazon.aws.ec2_instance:
+        name: "{{ instance_name }}"
+        region: "{{ region }}"
+        state: absent
+        wait_timeout: 3
