@@ -7,4 +7,48 @@
     ansible_python_interpreter: /usr/bin/python3
 
   tasks:
-    - name: 
+    - name: Create a configmap that has one key/value pair as data
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: exercise-configmap
+            namespace: default
+          data:
+            key1: value1
+
+    - name: Update the configmap to add a new key/value pair using a resource definition that only contains the new key/value pair
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: exercise-configmap
+            namespace: default
+          data:
+            key2: value2
+
+    - name: Query the cluster to verify that the configmap contains both key/value pairs
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: ConfigMap
+        name: exercise-configmap
+        namespace: default
+      register: configmap_info
+
+    - name: Debug configmap info
+      debug:
+        msg: "{{ configmap_info.resources[0].data }}"
+
+    - name: Delete the configmap
+      kubernetes.core.k8s:
+        state: absent
+        definition:
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: exercise-configmap
+            namespace: default
