@@ -33,6 +33,7 @@
 
     - name: Query the cluster to verify that the pod is successfully running.
       kubernetes.core.k8s_info:
+        wait: true
         api_version: v1
         kind: Pod
         name: exercise-pod
