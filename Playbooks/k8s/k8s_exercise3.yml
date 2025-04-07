@@ -1,0 +1,290 @@
+---
+- name: k8s Exercise 3
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+
+  tasks:
+    - name: Create namespaces for each group of pods
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: "{{ namespace }}"
+      loop:
+        - task-1
+        - task-2
+        - task-3
+      loop_control:
+        loop_var: namespace
+
+    - name: Create pod with dev label 1 in "task-1" namespace
+      kubernetes.core.k8s:
+        state: present
+        force: yes
+        definition:
+          apiVersion: v1
+          kind: Pod
+          metadata:
+            name: exercise-pod-dev-1
+            namespace: task-1
+            labels:
+              environment: dev
+          spec:
+            containers:
+              - name: exercise-container
+                image: busybox
+                command: ["/bin/sh", "-c", "while true; do echo hello; sleep 10; done"]
+
+    - name: Create pod with dev label 2 in "task-1" namespace
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Pod
+          metadata:
+            name: exercise-pod-dev-2
+            namespace: task-1
+            labels:
+              environment: dev
+          spec:
+            containers:
+              - name: exercise-container
+                image: busybox
+                command: ["/bin/sh", "-c", "while true; do echo hello; sleep 10; done"]
+
+    - name: Create pod with prod label in "task-1" namespace
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Pod
+          metadata:
+            name: exercise-pod-prod
+            namespace: task-1
+            labels:
+              environment: prod
+          spec:
+            containers:
+              - name: exercise-container
+                image: busybox
+                command: ["/bin/sh", "-c", "while true; do echo hello; sleep 10; done"]
+
+    - name: Verify that all of the dev pods are running
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: Pod
+        namespace: task-1
+        label_selectors:
+          - "environment=dev"
+      register: dev_pod_info
+
+    - name: Debug dev pods info
+      debug:
+        msg: "{{ dev_pod_info.resources }}"
+
+    - name: Verify that the prod pod is running
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: Pod
+        namespace: task-1
+        label_selectors:
+          - "environment=prod"
+      register: prod_pod_info
+
+    - name: Debug prod pod info
+      debug:
+        msg: "{{ prod_pod_info.resources }}"
+
+    - name: Cleanup - Get all pods created in this exercise
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: Pod
+        namespace: task-1
+        label_selectors:
+          - "environment in (dev, prod)"
+      register: all_pods
+      ignore_errors: yes
+
+    - name: Delete only the pods with the "environment=dev" label using the k8s module
+      kubernetes.core.k8s:
+        state: absent
+        api_version: v1
+        kind: Pod
+        namespace: task-1
+        label_selectors:
+          - "environment=dev"
+
+    - name: Cleanup -- Delete pods with the "environment=prod" label using the k8s module
+      kubernetes.core.k8s:
+        state: absent
+        api_version: v1
+        kind: Pod
+        namespace: task-1
+        label_selectors:
+          - "environment=prod"
+
+    - name: Create pod with dev label 1 in "task-2" namespace
+      kubernetes.core.k8s:
+        state: present
+        force: yes
+        definition:
+          apiVersion: v1
+          kind: Pod
+          metadata:
+            name: exercise-pod-dev-1
+            namespace: task-2
+            labels:
+              environment: dev
+          spec:
+            containers:
+              - name: exercise-container
+                image: busybox
+                command: ["/bin/sh", "-c", "while true; do echo hello; sleep 10; done"]
+
+    - name: Create pod with dev label 2 in "task-2" namespace
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Pod
+          metadata:
+            name: exercise-pod-dev-2
+            namespace: task-2
+            labels:
+              environment: dev
+          spec:
+            containers:
+              - name: exercise-container
+                image: busybox
+                command: ["/bin/sh", "-c", "while true; do echo hello; sleep 10; done"]
+
+    - name: Create pod with prod label in "task-2" namespace
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Pod
+          metadata:
+            name: exercise-pod-prod
+            namespace: task-2
+            labels:
+              environment: prod
+          spec:
+            containers:
+              - name: exercise-container
+                image: busybox
+                command: ["/bin/sh", "-c", "while true; do echo hello; sleep 10; done"]
+
+    - name: Register dev pods for deletion
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: Pod
+        namespace: task-2
+        label_selectors:
+          - "environment=dev"
+      register: dev_pods
+
+    - name: Debug dev_pods
+      debug:
+        var: dev_pods
+
+    - name: Delete registered dev_pods
+      kubernetes.core.k8s:
+        state: absent
+        api_version: v1
+        kind: Pod
+        namespace: task-2
+        name: "{{ item.metadata.name }}"
+      loop: "{{ dev_pods.resources }}"
+
+    - name: Cleanup -- Delete pods with the "environment=prod" label
+      kubernetes.core.k8s:
+        state: absent
+        api_version: v1
+        kind: Pod
+        namespace: task-2
+        label_selectors:
+          - "environment=prod"
+
+    - name: Create pod with dev label 1 in "task-3" namespace
+      kubernetes.core.k8s:
+        state: present
+        force: yes
+        definition:
+          apiVersion: v1
+          kind: Pod
+          metadata:
+            name: exercise-pod-dev-1
+            namespace: task-3
+            labels:
+              environment: dev
+          spec:
+            containers:
+              - name: exercise-container
+                image: busybox
+                command: ["/bin/sh", "-c", "while true; do echo hello; sleep 10; done"]
+
+    - name: Create pod with dev label 2 in "task-3" namespace
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Pod
+          metadata:
+            name: exercise-pod-dev-4
+            namespace: task-3
+            labels:
+              environment: dev
+          spec:
+            containers:
+              - name: exercise-container
+                image: busybox
+                command: ["/bin/sh", "-c", "while true; do echo hello; sleep 10; done"]
+
+    - name: Create pod with prod label in "task-3" namespace
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Pod
+          metadata:
+            name: exercise-pod-prod
+            namespace: task-3
+            labels:
+              environment: prod
+          spec:
+            containers:
+              - name: exercise-container
+                image: busybox
+                command: ["/bin/sh", "-c", "while true; do echo hello; sleep 10; done"]
+
+    - name: Use the k8s lookup plugin to pass the list of pods to delete to the k8s module
+      set_fact:
+        pods_to_delete: "{{ query('kubernetes.core.k8s', api_version='v1', kind='Pod', namespace='task-3', label_selectors=['environment=dev']) }}"
+
+    - name: Debug pods_to_delete
+      debug:
+        msg: "{{ query('kubernetes.core.k8s', kind='Pod', namespace='task-3') }}"
+
+    - name: Delete the pods using lookup results
+      kubernetes.core.k8s:
+        state: absent
+        api_version: v1
+        kind: Pod
+        namespace: task-3
+        name: "{{ item.metadata.name }}"
+      loop: "{{ pods_to_delete }}"
+
+    - name: Cleanup - Verify all pods are deleted
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: Pod
+        namespace: task-3
+        label_selectors:
+          - "environment in (dev, prod)"
+      register: remaining_pods
