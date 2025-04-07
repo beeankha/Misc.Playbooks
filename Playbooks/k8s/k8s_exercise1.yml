@@ -52,8 +52,3 @@
           kind: Namespace
           metadata:
             name: exercise
-
-    - name: Verify playbook execution
-      debug:
-        msg: "Playbook executed successfully! All resources were created and then cleaned up."
-
