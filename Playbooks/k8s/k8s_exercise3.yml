@@ -180,6 +180,17 @@
                 image: busybox
                 command: ["/bin/sh", "-c", "while true; do echo hello; sleep 10; done"]
 
+    - name: Verify that all of the task-2 pods are running
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: Pod
+        namespace: task-2
+      register: task_2_pod_info
+
+    - name: Debug task-2 pods info
+      debug:
+        msg: "{{ task_2_pod_info.resources }}"
+
     - name: Register dev pods for deletion
       kubernetes.core.k8s_info:
         api_version: v1
@@ -262,6 +273,17 @@
               - name: exercise-container
                 image: busybox
                 command: ["/bin/sh", "-c", "while true; do echo hello; sleep 10; done"]
+
+    - name: Verify that all of the task-3 pods are running
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: Pod
+        namespace: task-3
+      register: task_3_pod_info
+
+    - name: Debug task-3 pods info
+      debug:
+        msg: "{{ task_3_pod_info.resources }}"
 
     - name: Use the k8s lookup plugin to pass the list of pods to delete to the k8s module
       set_fact:
