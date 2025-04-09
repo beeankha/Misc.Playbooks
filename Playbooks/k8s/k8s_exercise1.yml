@@ -1,0 +1,55 @@
+---
+- name: k8s Exercise 1
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+
+  tasks:
+    - name: Create a namespace.
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: exercise
+
+    - name: Deploy a pod to that namespace with a single container that just runs indefinitely.
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Pod
+          metadata:
+            name: exercise-pod
+            namespace: exercise
+          spec:
+            containers:
+              - name: exercise-container
+                image: busybox
+                command: ["/bin/sh", "-c", "while true; do echo hello; sleep 10; done"]
+
+    - name: Query the cluster to verify that the pod is successfully running.
+      kubernetes.core.k8s_info:
+        wait: true
+        api_version: v1
+        kind: Pod
+        name: exercise-pod
+        namespace: exercise
+      register: pod_info
+
+    - name: Debug pod status
+      debug:
+        msg: "Pod is running"
+      when: pod_info.resources[0].status.phase == "Running"
+
+    - name: Delete the namespace.
+      kubernetes.core.k8s:
+        state: absent
+        definition:
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: exercise
